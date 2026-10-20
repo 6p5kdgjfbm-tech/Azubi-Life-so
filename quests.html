@@ -33,7 +33,6 @@ h2{margin:0;font-family:Orbitron,sans-serif;font-size:12px;letter-spacing:2px;co
 .books button:hover{background:var(--cy);color:#05080d}
 /* Hauptraster */
 .main{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px}
-@media (max-width:720px){.main{grid-template-columns:1fr}.stats{display:grid;grid-template-columns:200px minmax(0,1fr);align-items:center;column-gap:10px}.stats h2{grid-column:1/-1}}
 .qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .quest{display:flex;flex-direction:column;gap:4px;padding:7px 9px;background:rgba(255,154,60,.07);border:1px solid rgba(255,154,60,.35)}
@@ -59,7 +58,6 @@ button:hover{background:var(--or);color:#05080d}
 .week{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .week h2{white-space:nowrap}
 .witems{flex:1 1 300px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-@media (max-width:440px){.witems{grid-template-columns:1fr}}
 .witem{display:flex;align-items:center;min-width:0}
 .witem label{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;cursor:pointer}
 .witem input[type=checkbox]{width:20px;height:20px;accent-color:var(--cy);margin:0}
@@ -67,9 +65,11 @@ button:hover{background:var(--or);color:#05080d}
 .witem input[type=text]::placeholder{color:var(--mu);opacity:1}
 .witem.ok input[type=text]{text-decoration:line-through;color:var(--mu)}
 .pop{animation:pop .4s ease-out}
+html,body{height:100%;overflow:hidden!important}body{padding:0!important}#fit{transform-origin:0 0;padding:10px;box-sizing:border-box}
 </style>
 </head>
 <body>
+<div id="fit">
 <section class="card or-b status" aria-label="Spieler-Status">
   <div class="px lvl" id="lvl">LVL 1</div>
   <div class="xpwrap"><div class="xpbar" id="xpbar" aria-hidden="true"></div><div class="px xptxt" id="xpTxt">0 / 100 XP</div></div>
@@ -92,6 +92,7 @@ button:hover{background:var(--or);color:#05080d}
   <div class="witems" id="weekly"></div>
   <button type="button" class="cy" id="newWeek">↻ Neue Woche</button>
 </section>
+</div>
 <script>
 var QUESTS=[
  {id:'push',name:'Liegestütze',unit:'Wdh.',xp:10,stat:'Stärke',full:'Wiederholungen'},
@@ -174,7 +175,7 @@ function renderWeekly(){
     var lb=document.createElement('label');lb.appendChild(c);r.appendChild(lb);r.appendChild(t);box.appendChild(r);
   });
 }
-function render(){renderStatus();renderQuests();renderRadar();renderWeekly()}
+function render(){renderStatus();renderQuests();renderRadar();renderWeekly();if(window.fitWidget)fitWidget()}
 document.getElementById('bPlus').addEventListener('click',function(){st.books++;save();renderStatus();var b=document.getElementById('books');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')});
 document.getElementById('bMinus').addEventListener('click',function(){st.books=Math.max(0,st.books-1);save();renderStatus()});
 document.getElementById('newWeek').addEventListener('click',function(){st.weekly.forEach(function(w){w.ok=false});st.week=isoWeek(new Date());save();renderWeekly()});
@@ -182,6 +183,24 @@ rollover();
 if(st.week!==isoWeek(new Date())){st.weekly.forEach(function(w){w.ok=false});st.week=isoWeek(new Date());save()}
 render();
 setInterval(function(){var d=st.day;rollover();if(st.day!==d)render()},60000);
+</script>
+<script>
+(function(){
+var f=document.getElementById('fit');
+function fit(){
+  var W=document.documentElement.clientWidth,H=document.documentElement.clientHeight;if(!W||!H)return;
+  f.style.transform='none';
+  function ok(s){f.style.width=(W/s)+'px';return f.scrollHeight*s<=H+0.5}
+  var MINW=760,s0=MINW?Math.min(1,W/MINW):1,s=s0;
+  if(!ok(s0)){var lo=0.2,hi=s0;for(var i=0;i<14;i++){var m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}s=lo}
+  f.style.width=(W/s)+'px';f.style.transform=s<1?'scale('+s+')':'none';
+}
+window.fitWidget=fit;
+window.addEventListener('resize',fit);
+if(window.ResizeObserver){new ResizeObserver(function(){requestAnimationFrame(fit)}).observe(document.documentElement)}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fit)}
+window.addEventListener('load',fit);fit();
+})();
 </script>
 </body>
 </html>

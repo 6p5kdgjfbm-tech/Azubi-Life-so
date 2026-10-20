@@ -36,9 +36,11 @@ h1{margin:0;font-family:Orbitron,sans-serif;font-size:clamp(26px,3.4vw,40px);let
 .badge{flex:0 0 220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:12px 10px 12px 30px;background:var(--or);color:#05080d;clip-path:polygon(24px 0,100% 0,100% 100%,0 100%);animation:glow 3s ease-in-out infinite;text-align:center}
 .kw{font-family:Orbitron,sans-serif;font-size:32px;font-weight:700}
 .date{font-size:15px;letter-spacing:2px;font-weight:700}
+html,body{height:100%;overflow:hidden!important}body{padding:0!important}#fit{transform-origin:0 0;padding:16px;box-sizing:border-box}
 </style>
 </head>
 <body>
+<div id="fit">
 <div class="scan" aria-hidden="true"></div>
 <div class="wrap">
   <div class="title">
@@ -67,6 +69,7 @@ h1{margin:0;font-family:Orbitron,sans-serif;font-size:clamp(26px,3.4vw,40px);let
     <div class="date" id="date">-</div>
   </div>
 </div>
+</div>
 <script>
 var START=new Date(2025,8,1), END=new Date(2029,1,28);
 var TAGE=['SONNTAG','MONTAG','DIENSTAG','MITTWOCH','DONNERSTAG','FREITAG','SAMSTAG'];
@@ -88,6 +91,24 @@ function tick(){
   document.getElementById('ringLbl').setAttribute('aria-label','Ausbildungsfortschritt '+Math.round(p)+' Prozent');
 }
 tick();setInterval(tick,15000);
+</script>
+<script>
+(function(){
+var f=document.getElementById('fit');
+function fit(){
+  var W=document.documentElement.clientWidth,H=document.documentElement.clientHeight;if(!W||!H)return;
+  f.style.transform='none';
+  function ok(s){f.style.width=(W/s)+'px';return f.scrollHeight*s<=H+0.5}
+  var MINW=0,s0=MINW?Math.min(1,W/MINW):1,s=s0;
+  if(!ok(s0)){var lo=0.2,hi=s0;for(var i=0;i<14;i++){var m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}s=lo}
+  f.style.width=(W/s)+'px';f.style.transform=s<1?'scale('+s+')':'none';
+}
+window.fitWidget=fit;
+window.addEventListener('resize',fit);
+if(window.ResizeObserver){new ResizeObserver(function(){requestAnimationFrame(fit)}).observe(document.documentElement)}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fit)}
+window.addEventListener('load',fit);fit();
+})();
 </script>
 </body>
 </html>

@@ -23,9 +23,11 @@ h2{margin:0;align-self:flex-start;font-family:Orbitron,sans-serif;font-size:13px
 button{min-height:44px;padding:0 22px;background:transparent;border:1px solid var(--cy);color:var(--cy);font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer}
 button:hover{background:var(--cy);color:#05080d}
 .sec{border-color:rgba(58,224,245,.45);color:var(--mu)}
+html,body{height:100%;overflow:hidden!important}body{padding:0!important}#fit{transform-origin:0 0;padding:16px;box-sizing:border-box}
 </style>
 </head>
 <body>
+<div id="fit">
 <div class="card" id="card">
   <h2>FOKUS-TIMER</h2>
   <div class="ring">
@@ -41,6 +43,7 @@ button:hover{background:var(--cy);color:#05080d}
     <button type="button" class="sec" id="pause">PAUSE 5</button>
     <button type="button" class="sec" id="reset">RESET</button>
   </div>
+</div>
 </div>
 <script>
 var total=25*60,left=total,timer=null,mode='FOKUS',endAt=0;
@@ -60,6 +63,24 @@ document.getElementById('pause').addEventListener('click',function(){set(5,'PAUS
 document.getElementById('reset').addEventListener('click',function(){set(25,'FOKUS')});
 document.addEventListener('visibilitychange',function(){if(timer)tick()});
 draw();
+</script>
+<script>
+(function(){
+var f=document.getElementById('fit');
+function fit(){
+  var W=document.documentElement.clientWidth,H=document.documentElement.clientHeight;if(!W||!H)return;
+  f.style.transform='none';
+  function ok(s){f.style.width=(W/s)+'px';return f.scrollHeight*s<=H+0.5}
+  var MINW=0,s0=MINW?Math.min(1,W/MINW):1,s=s0;
+  if(!ok(s0)){var lo=0.2,hi=s0;for(var i=0;i<14;i++){var m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}s=lo}
+  f.style.width=(W/s)+'px';f.style.transform=s<1?'scale('+s+')':'none';
+}
+window.fitWidget=fit;
+window.addEventListener('resize',fit);
+if(window.ResizeObserver){new ResizeObserver(function(){requestAnimationFrame(fit)}).observe(document.documentElement)}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fit)}
+window.addEventListener('load',fit);fit();
+})();
 </script>
 </body>
 </html>

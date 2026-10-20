@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUD Kopfzeile</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+:root{--bg:#05080d;--panel:rgba(10,18,32,.92);--cy:#3ae0f5;--or:#ff9a3c;--tx:#d9f6ff;--mu:#8fb9c7;--hi:#e8fbff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Rajdhani,system-ui,sans-serif}
+body{background-image:linear-gradient(rgba(58,224,245,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(58,224,245,.05) 1px,transparent 1px);background-size:40px 40px;padding:16px;overflow-x:hidden;position:relative}
+.scan{position:absolute;left:0;right:0;top:0;height:2px;background:rgba(58,224,245,.35);box-shadow:0 0 18px rgba(58,224,245,.6);animation:scan 7s linear infinite;pointer-events:none}
+@keyframes scan{from{transform:translateY(-10px)}to{transform:translateY(300px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinr{to{transform:rotate(-360deg)}}
+@keyframes pulse{50%{opacity:.4}}
+@keyframes glow{50%{filter:brightness(1.18)}}
+.wrap{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap}
+.title{flex:1 1 380px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:16px 40px 16px 24px;background:var(--panel);border-top:2px solid var(--cy);clip-path:polygon(0 0,100% 0,calc(100% - 28px) 100%,0 100%)}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:3px;color:var(--mu)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy);animation:pulse 2.4s ease-in-out infinite}
+h1{margin:0;font-family:Orbitron,sans-serif;font-size:clamp(26px,3.4vw,40px);letter-spacing:5px;color:var(--hi);text-shadow:0 0 16px rgba(58,224,245,.7)}
+.prog{flex:1 1 360px;display:flex;align-items:center;gap:18px;padding:14px 22px;background:var(--panel);clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px))}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring .d{position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(58,224,245,.45);animation:spinr 22s linear infinite}
+.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.core{position:absolute;inset:34px;border-radius:50%;background:radial-gradient(circle,rgba(58,224,245,.35),rgba(5,8,13,.9) 70%);box-shadow:0 0 30px rgba(58,224,245,.55);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.clock{font-family:Orbitron,sans-serif;font-size:21px;color:var(--hi)}
+.pct{font-size:16px;font-weight:700;color:var(--or)}
+.info{display:flex;flex-direction:column;gap:4px}
+.lbl{font-family:Orbitron,sans-serif;font-size:12px;letter-spacing:3px;color:var(--mu)}
+.big{font-size:18px;font-weight:700;color:var(--hi)}
+.sm{font-size:15px;color:var(--mu)}
+.or{color:var(--or);font-weight:700}
+.badge{flex:0 0 220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:12px 10px 12px 30px;background:var(--or);color:#05080d;clip-path:polygon(24px 0,100% 0,100% 100%,0 100%);animation:glow 3s ease-in-out infinite;text-align:center}
+.kw{font-family:Orbitron,sans-serif;font-size:32px;font-weight:700}
+.date{font-size:15px;letter-spacing:2px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="scan" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="title">
+    <div class="status"><span class="dot"></span><span>SYSTEM ONLINE · ALLE MODULE BEREIT</span></div>
+    <h1>AZUBI LIFE OS</h1>
+  </div>
+  <div class="prog">
+    <div class="ring" role="img" id="ringLbl" aria-label="Ausbildungsfortschritt">
+      <div class="d"></div>
+      <svg viewBox="0 0 150 150" width="150" height="150" aria-hidden="true">
+        <circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,154,60,.18)" stroke-width="6"/>
+        <circle id="arc" cx="75" cy="75" r="62" fill="none" stroke="#ff9a3c" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="filter:drop-shadow(0 0 5px rgba(255,154,60,.7))"/>
+      </svg>
+      <div class="core"><div class="clock" id="clock">--:--</div><div class="pct" id="pct">-- %</div></div>
+    </div>
+    <div class="info">
+      <div class="lbl">UHR · AUSBILDUNG</div>
+      <div class="big">Konstruktionsmechaniker</div>
+      <div class="sm" id="lj" style="color:#d9f6ff">-</div>
+      <div class="sm">Noch <span class="or" id="rest">-</span></div>
+      <div class="sm">Start 01.09.2025 · Ende ca. 02/2029</div>
+    </div>
+  </div>
+  <div class="badge">
+    <div class="kw" id="kw">KW --</div>
+    <div class="date" id="date">-</div>
+  </div>
+</div>
+<script>
+var START=new Date(2025,8,1), END=new Date(2029,1,28);
+var TAGE=['SONNTAG','MONTAG','DIENSTAG','MITTWOCH','DONNERSTAG','FREITAG','SAMSTAG'];
+function pad(n){return (n<10?'0':'')+n}
+function isoWeek(d){var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);var y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y)/86400000+1)/7)}
+function tick(){
+  var n=new Date();
+  document.getElementById('clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes());
+  document.getElementById('kw').textContent='KW '+isoWeek(n);
+  document.getElementById('date').textContent=TAGE[n.getDay()]+' · '+pad(n.getDate())+'.'+pad(n.getMonth()+1)+'.'+n.getFullYear();
+  var today=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  var total=Math.round((END-START)/86400000), done=Math.round((today-START)/86400000);
+  var p=Math.max(0,Math.min(100,done/total*100));
+  document.getElementById('pct').textContent=Math.round(p)+' %';
+  document.getElementById('arc').setAttribute('stroke-dasharray',p.toFixed(1)+' '+(100-p).toFixed(1));
+  document.getElementById('rest').textContent=Math.max(0,total-done)+' Tage';
+  var lj=Math.min(4,Math.floor(done/365)+1);
+  document.getElementById('lj').textContent=lj+'. Lehrjahr';
+  document.getElementById('ringLbl').setAttribute('aria-label','Ausbildungsfortschritt '+Math.round(p)+' Prozent');
+}
+tick();setInterval(tick,15000);
+</script>
+</body>
+</html>

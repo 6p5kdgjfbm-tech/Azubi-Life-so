@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fokus-Timer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+:root{--bg:#05080d;--cy:#3ae0f5;--or:#ff9a3c;--mu:#8fb9c7;--hi:#e8fbff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:#d9f6ff;font-family:Rajdhani,system-ui,sans-serif}
+body{background-image:linear-gradient(rgba(58,224,245,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(58,224,245,.05) 1px,transparent 1px);background-size:40px 40px;padding:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card{background:rgba(10,18,32,.92);border:1px solid rgba(58,224,245,.35);padding:18px;display:flex;flex-direction:column;align-items:center;gap:14px}
+h2{margin:0;align-self:flex-start;font-family:Orbitron,sans-serif;font-size:13px;letter-spacing:3px;color:var(--mu);font-weight:500}
+.ring{position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center}
+.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.dash{position:absolute;inset:16px;border-radius:50%;border:1px dashed rgba(58,224,245,.45);animation:spin 14s linear infinite;animation-play-state:paused}
+.run .dash{animation-play-state:running}
+.time{font-family:Orbitron,sans-serif;font-size:38px;color:var(--hi);text-shadow:0 0 10px rgba(58,224,245,.7)}
+.mode{font-size:14px;letter-spacing:2px;color:var(--mu)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+button{min-height:44px;padding:0 22px;background:transparent;border:1px solid var(--cy);color:var(--cy);font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer}
+button:hover{background:var(--cy);color:#05080d}
+.sec{border-color:rgba(58,224,245,.45);color:var(--mu)}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <h2>FOKUS-TIMER</h2>
+  <div class="ring">
+    <svg viewBox="0 0 180 180" width="180" height="180" aria-hidden="true">
+      <circle cx="90" cy="90" r="82" fill="none" stroke="rgba(58,224,245,.15)" stroke-width="6"/>
+      <circle id="arc" cx="90" cy="90" r="82" fill="none" stroke="#3ae0f5" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="filter:drop-shadow(0 0 6px rgba(58,224,245,.7))"/>
+    </svg>
+    <div class="dash" aria-hidden="true"></div>
+    <div style="display:flex;flex-direction:column;align-items:center"><div class="time" id="time" role="timer" aria-live="off">25:00</div><div class="mode" id="mode">FOKUS</div></div>
+  </div>
+  <div class="btns">
+    <button type="button" id="start">START</button>
+    <button type="button" class="sec" id="pause">PAUSE 5</button>
+    <button type="button" class="sec" id="reset">RESET</button>
+  </div>
+</div>
+<script>
+var total=25*60,left=total,timer=null,mode='FOKUS',endAt=0;
+function pad(n){return (n<10?'0':'')+n}
+function draw(){document.getElementById('time').textContent=pad(Math.floor(left/60))+':'+pad(left%60);
+  var p=(total-left)/total*100;document.getElementById('arc').setAttribute('stroke-dasharray',p.toFixed(2)+' '+(100-p).toFixed(2));
+  document.getElementById('mode').textContent=mode;document.getElementById('start').textContent=timer?'STOPP':'START';
+  document.getElementById('card').classList.toggle('run',!!timer)}
+function stop(){clearInterval(timer);timer=null}
+function tick(){left=Math.max(0,Math.round((endAt-Date.now())/1000));if(left<=0){stop();mode=mode==='FOKUS'?'FERTIG – PAUSE?':'PAUSE VORBEI'}draw()}
+function run(){if(timer){stop();draw();return}
+  if(left<=0){total=25*60;left=total;mode='FOKUS'}
+  endAt=Date.now()+left*1000;timer=setInterval(tick,500);draw()}
+function set(min,m){stop();total=min*60;left=total;mode=m;draw()}
+document.getElementById('start').addEventListener('click',run);
+document.getElementById('pause').addEventListener('click',function(){set(5,'PAUSE');run()});
+document.getElementById('reset').addEventListener('click',function(){set(25,'FOKUS')});
+document.addEventListener('visibilitychange',function(){if(timer)tick()});
+draw();
+</script>
+</body>
+</html>
